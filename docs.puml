@@ -1,0 +1,33 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_TOP_DOWN()
+
+' 系统边界
+Person(user, "用户", "输入自然语言查询")
+
+System_Boundary(rag, "RAG问答系统") {
+    Container(knowledgeText, "知识文本", "原始文本数据")
+    Container(chunks, "文本块 (Chunks)", "分割的文本块")
+    Container(embeddingModel, "嵌入模型", "生成文本向量的模型")
+    Container(vectorDB, "向量数据库", "用于相似度搜索的数据库")
+    Container(queryEmbedding, "查询向量", "用户问题生成的嵌入向量")
+    Container(searchResult, "检索召回", "根据向量返回相似内容")
+    Container(llm, "LLM", "大语言模型，用于生成回答")
+    Container(answer, "回答输出", "生成最终回答")
+    ContainerDb(memory, "记忆库", "存储历史问答")
+}
+
+Rel(user, queryEmbedding, "输入查询", "自然语言")
+Rel(knowledgeText, chunks, "拆分为")
+Rel(chunks, embeddingModel, "进行嵌入")
+Rel(embeddingModel, vectorDB, "写入向量")
+Rel(queryEmbedding, embeddingModel, "生成查询嵌入")
+Rel(embeddingModel, vectorDB, "搜索相似向量", "向量相似度")
+Rel(vectorDB, searchResult, "返回相似文本块")
+Rel(searchResult, llm, "作为上下文")
+Rel(llm, answer, "生成回答")
+Rel(answer, user, "返回给用户")
+Rel(answer, memory, "写入历史问答", "可选")
+
+@enduml
